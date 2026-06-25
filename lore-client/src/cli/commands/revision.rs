@@ -1237,7 +1237,7 @@ pub fn handle_revision_commit(globals: LoreGlobalArgs, args: &RevisionCommitArgs
         layer: LoreString::from(args.layer.as_deref().unwrap_or("")),
         layer_paths: LoreArray::from_vec(layer_paths),
         layer_messages: LoreArray::from_vec(layer_msgs),
-        stats: args.stats,
+        stats: args.stats.into(),
     };
 
     let commit_entry_data: Arc<Mutex<Vec<RevisionEntryData>>> =

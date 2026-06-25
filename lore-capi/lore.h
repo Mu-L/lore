@@ -4300,7 +4300,7 @@ typedef struct lore_revision_commit_args_t {
   // Array of messages corresponding to each layer path (parallel array with `layer_paths`)
   struct lore_string_array_t layer_messages;
   // Emit per-fragment write stats during the commit
-  bool stats;
+  uint8_t stats;
 } lore_revision_commit_args_t;
 
 // Arguments for amending the most recent revision's commit message.

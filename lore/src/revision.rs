@@ -67,7 +67,7 @@ pub struct LoreRevisionCommitArgs {
     pub layer_messages: LoreArray<LoreString>,
     /// Emit per-fragment write stats during the commit
     #[serde(default)]
-    pub stats: bool,
+    pub stats: u8,
 }
 
 /// Commits all staged changes to the current branch as a new revision.
@@ -161,7 +161,7 @@ async fn commit_local(
                 link_messages,
                 layer,
                 layer_messages,
-                stats: args.stats,
+                stats: args.stats != 0,
             };
 
             // Enable upload to remote during commit unless offline or local
