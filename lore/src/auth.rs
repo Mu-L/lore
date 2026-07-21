@@ -629,7 +629,10 @@ async fn resolve_auth_endpoint(
         }
     }
 
-    Err(AuthStoreError::internal("No auth endpoint available"))
+    Err(NotSupported {
+        operation: "authentication requires a configured auth endpoint".to_string(),
+    }
+    .into())
 }
 
 async fn local_user_info_impl(
@@ -699,4 +702,38 @@ async fn local_user_info_impl(
             execution_context().dispatcher.complete_result(result).await
         })
         .await
+}
+
+#[cfg(test)]
+mod resolve_auth_endpoint_tests {
+    use lore_base::error::NotSupported;
+    use lore_error_set::FfiError;
+
+    use super::resolve_auth_endpoint;
+
+    // An explicit endpoint is returned verbatim without touching the
+    // repository config or the network.
+    #[tokio::test]
+    async fn returns_explicit_endpoint_verbatim() {
+        let endpoint = resolve_auth_endpoint("ucs-auth://auth.example.com", "/does/not/exist")
+            .await
+            .expect("an explicit endpoint should resolve");
+        assert_eq!(endpoint, "ucs-auth://auth.example.com");
+    }
+
+    // With no explicit endpoint and no resolvable repository remote, the
+    // operation is `NotSupported` (code 18) — there is no URL to key a token
+    // lookup on — rather than an opaque internal error.
+    #[tokio::test]
+    async fn missing_endpoint_is_not_supported() {
+        let err = resolve_auth_endpoint("", "/does/not/exist")
+            .await
+            .expect_err("a missing endpoint must be an error");
+
+        let not_supported_code = NotSupported {
+            operation: String::new(),
+        }
+        .ffi_code();
+        assert_eq!(err.ffi_code(), not_supported_code);
+    }
 }
